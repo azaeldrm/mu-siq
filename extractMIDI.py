@@ -85,7 +85,7 @@ def extractNotes(q, img_file):
         cmd = {'linux':'eog', 'win32':'explorer', 'darwin':'open'}[sys.platform]
         subprocess.run([cmd, path])
 
-    def extractMIDI(q, img_file):
+    def extractMIDI(img_file):
         img = cv2.imread(img_file, 0)
         img_width, img_height = img.shape[::-1]
         scale_ratio = round(x_goal / img_width, 2)
@@ -276,6 +276,8 @@ def extractNotes(q, img_file):
 
         print('ExtractMIDI results: ')
         print(notes_array)
-        q.put([notes_array])
+        return notes_array
 
-    extractMIDI(q, img_file)
+    notes_array = extractMIDI(img_file)
+    q.put(notes_array)
+    q.join()

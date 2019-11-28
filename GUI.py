@@ -202,13 +202,13 @@ class scanGUI(GUI):
             screen.blit(titleSurf, titleRect)
             screen.blit(image, (round(sizeX/2)-round(400/2),100))
 
-            notes_array = [['e3 4 1'], ['d3 4 1'], ['c3 4 1'], ['d3 4 1'], ['e3 4 1'], ['e3 4 1'], ['e3 2 1'], ['d3 4 1'], ['d3 4 1'], ['d3 2 1'], ['e3 4 1'], ['g3 4 1'],
-            ['g3 2 1'], ['e3 4 1'], ['d3 4 1'], ['c3 4 1'], ['d3 4 1'], ['e3 4 1'], ['e3 4 1'], ['e3 2 1'], ['d3 4 1'], ['d3 4 1'], ['e3 4 1'], ['d3 4 1'], ['c3 1 1']]
+            # notes_array = [['e3 4 1'], ['d3 4 1'], ['c3 4 1'], ['d3 4 1'], ['e3 4 1'], ['e3 4 1'], ['e3 2 1'], ['d3 4 1'], ['d3 4 1'], ['d3 2 1'], ['e3 4 1'], ['g3 4 1'],
+            # ['g3 2 1'], ['e3 4 1'], ['d3 4 1'], ['c3 4 1'], ['d3 4 1'], ['e3 4 1'], ['e3 4 1'], ['e3 2 1'], ['d3 4 1'], ['d3 4 1'], ['e3 4 1'], ['d3 4 1'], ['c3 1 1']]
 
 
             # Draw buttons
-            self.createButton(screen,"YES",scan_button_pos_x,scan_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.moveToNewScreen,[musicGUI,[notes_array]])
-            # self.createButton(screen,"YES",scan_button_pos_x,scan_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.moveToNewScreen,extractGUI)
+            # self.createButton(screen,"YES",scan_button_pos_x,scan_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.moveToNewScreen,[musicGUI,[notes_array]])
+            self.createButton(screen,"YES",scan_button_pos_x,scan_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.moveToNewScreen,extractGUI)
             self.createButton(screen,"NO",quit_button_pos_x,quit_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.moveToNewScreen,mainGUI)
 
             # Refresh the game
@@ -293,6 +293,7 @@ class extractGUI(GUI, Thread):
             if not q.empty():
                 print('Queue received information.')
                 notes_array = q.get()
+                q.task_done()
                 if notes_array == None:
                     self.extracted = False
                 else:
@@ -359,7 +360,7 @@ class musicGUI(GUI, motorCONTROL, Thread):
         screen = pygame.display.set_mode((sizeX, sizeY))
         progress = 0
         ratio = 2.5
-        BPM = 40 # Adjust this for the speed of the song.
+        BPM = 60 # Adjust this for the speed of the song.
         FPS = 120
         FPM = FPS * 60
         FPB = round(FPM/BPM)
