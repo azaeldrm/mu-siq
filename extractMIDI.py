@@ -89,7 +89,9 @@ def extractNotes(q, img_file):
         img = cv2.imread(img_file, 0)
         img_width, img_height = img.shape[::-1]
         scale_ratio = round(x_goal / img_width, 2)
+        print('Original image width and height:')
         print((img_width,img_height))
+        print('Scale ratio:')
         print(scale_ratio)
         resize_dim = (int(img_width * scale_ratio), int(img_height * scale_ratio))
         img = cv2.resize(img,resize_dim,interpolation = cv2.INTER_AREA)
@@ -97,9 +99,10 @@ def extractNotes(q, img_file):
         img = cv2.cvtColor(img_gray,cv2.COLOR_GRAY2RGB)
         ret,img_gray = cv2.threshold(img_gray,127,255,cv2.THRESH_BINARY)
         img_width, img_height = img_gray.shape[::-1]
+        print('New image with and height:')
         print((img_width,img_height))
 
-        print("Matching staff image...")
+        print("\nMatching staff image...")
         staff_recs = locate_images(img_gray, staff_imgs, staff_lower, staff_upper, staff_thresh)
 
         print("Filtering weak staff matches...")
@@ -125,26 +128,26 @@ def extractNotes(q, img_file):
         cv2.imwrite('staff_boxes_img.png', staff_boxes_img)
         # open_file('staff_boxes_img.png')
 
-        print("Matching sharp image...")
-        sharp_recs = locate_images(img_gray, sharp_imgs, sharp_lower, sharp_upper, sharp_thresh)
-
-        print("Merging sharp image results...")
-        sharp_recs = merge_recs([j for i in sharp_recs for j in i], 0.5)
-        sharp_recs_img = img.copy()
-        for r in sharp_recs:
-            r.draw(sharp_recs_img, (0, 0, 255), 2)
-        cv2.imwrite('sharp_recs_img.png', sharp_recs_img)
+        # print("Matching sharp image...")
+        # sharp_recs = locate_images(img_gray, sharp_imgs, sharp_lower, sharp_upper, sharp_thresh)
+        #
+        # print("Merging sharp image results...")
+        # sharp_recs = merge_recs([j for i in sharp_recs for j in i], 0.5)
+        # sharp_recs_img = img.copy()
+        # for r in sharp_recs:
+        #     r.draw(sharp_recs_img, (0, 0, 255), 2)
+        # cv2.imwrite('sharp_recs_img.png', sharp_recs_img)
         # open_file('sharp_recs_img.png')
 
-        print("Matching flat image...")
-        flat_recs = locate_images(img_gray, flat_imgs, flat_lower, flat_upper, flat_thresh)
-
-        print("Merging flat image results...")
-        flat_recs = merge_recs([j for i in flat_recs for j in i], 0.5)
-        flat_recs_img = img.copy()
-        for r in flat_recs:
-            r.draw(flat_recs_img, (0, 0, 255), 2)
-        cv2.imwrite('flat_recs_img.png', flat_recs_img)
+        # print("Matching flat image...")
+        # flat_recs = locate_images(img_gray, flat_imgs, flat_lower, flat_upper, flat_thresh)
+        #
+        # print("Merging flat image results...")
+        # flat_recs = merge_recs([j for i in flat_recs for j in i], 0.5)
+        # flat_recs_img = img.copy()
+        # for r in flat_recs:
+        #     r.draw(flat_recs_img, (0, 0, 255), 2)
+        # cv2.imwrite('flat_recs_img.png', flat_recs_img)
         # open_file('flat_recs_img.png')
 
         print("Matching quarter image...")
@@ -182,15 +185,15 @@ def extractNotes(q, img_file):
 
         note_groups = []
         for box in staff_boxes:
-            staff_sharps = [Note(r, "sharp", box)
-                for r in sharp_recs if abs(r.middle[1] - box.middle[1]) < box.h*5.0/8.0]
-            staff_flats = [Note(r, "flat", box)
-                for r in flat_recs if abs(r.middle[1] - box.middle[1]) < box.h*5.0/8.0]
-            quarter_notes = [Note(r, "4", box, staff_sharps, staff_flats)
+            # staff_sharps = [Note(r, "sharp", box)
+            #     for r in sharp_recs if abs(r.middle[1] - box.middle[1]) < box.h*5.0/8.0]
+            # staff_flats = [Note(r, "flat", box)
+            #     for r in flat_recs if abs(r.middle[1] - box.middle[1]) < box.h*5.0/8.0]
+            quarter_notes = [Note(r, "4", box)
                 for r in quarter_recs if abs(r.middle[1] - box.middle[1]) < box.h*5.0/8.0]
-            half_notes = [Note(r, "2", box, staff_sharps, staff_flats)
+            half_notes = [Note(r, "2", box)
                 for r in half_recs if abs(r.middle[1] - box.middle[1]) < box.h*5.0/8.0]
-            whole_notes = [Note(r, "1", box, staff_sharps, staff_flats)
+            whole_notes = [Note(r, "1", box)
                 for r in whole_recs if abs(r.middle[1] - box.middle[1]) < box.h*5.0/8.0]
             staff_notes = quarter_notes + half_notes + whole_notes
             staff_notes.sort(key=lambda n: n.rec.x)
@@ -200,10 +203,10 @@ def extractNotes(q, img_file):
             note_group = []
             i = 0; j = 0;
 
-            print('staff_notes length: ' + str(len(staff_notes)))
+            # print('staff_notes length: ' + str(len(staff_notes)))
             # for num, notes in enumerate(staff_notes):
             #     print('Note ' + str(num) + ': ' + str(notes.rec.x))
-            print('staffs length: '+ str(len(staffs)))
+            # print('staffs length: '+ str(len(staffs)))
             # for num, staff in enumerate(staffs):
             #     print('Staff ' + str(num) + ': ' + str(staff.x))
 
@@ -225,11 +228,11 @@ def extractNotes(q, img_file):
 
         for r in staff_boxes:
             r.draw(img, (0, 0, 255), 2)
-        for r in sharp_recs:
-            r.draw(img, (0, 0, 255), 2)
-        flat_recs_img = img.copy()
-        for r in flat_recs:
-            r.draw(img, (0, 0, 255), 2)
+        # for r in sharp_recs:
+        #     r.draw(img, (0, 0, 255), 2)
+        # flat_recs_img = img.copy()
+        # for r in flat_recs:
+        #     r.draw(img, (0, 0, 255), 2)
 
         cv2.imwrite('res.png', img)
         # open_file('res.png')
