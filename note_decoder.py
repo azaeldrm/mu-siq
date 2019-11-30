@@ -59,12 +59,13 @@ def note_decoder(note, counter, pentagram):
 
     # print(note)
     position['X'] = counter*xspace
+    note_trigger = position['X']
     position['Y'] = pentagram_to_pos[note_to_pentagram[note[0][0:2]]] + location_error + note_error[note[1]]
     position['duration'] = int(1/(float(note[1])/4))
     counter = counter + position['duration']
 
 
-    return position, counter
+    return position, counter, note_trigger
 
 
 

@@ -70,9 +70,9 @@ class GUI:
 
             elif click[0] == 0:
                 buttonDown = False
-                    
+
         else:
-            pygame.draw.rect(screen, a_color, (pos_x, pos_y, length, height))    
+            pygame.draw.rect(screen, a_color, (pos_x, pos_y, length, height))
 
         textSurf, textRect = self.createText(msg,(240,240,240))
         textRect.center = (pos_x+round(length/2),pos_y+round(height/2))
@@ -83,7 +83,7 @@ class mainGUI(GUI):
     def __init__(self):
         GUI.__init__(self)
         self.init_gui()
-    
+
     def init_gui(self):
         # Declaring variables
         print('mainGUI initialized.')
@@ -130,7 +130,7 @@ class mainGUI(GUI):
             # Draw buttons
             # self.createButton(screen,"SCAN",scan_button_pos_x,scan_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.moveToMusicScreen,musicGUI)
             # self.createButton(screen,"SCAN",scan_button_pos_x,scan_button_pos_y,buttonX,buttonY,RED_B,RED_D,scan_img,['musicsheet2.jpg','./resources/camera/','./resources/scanned/'])
-            
+
             self.createButton(screen,"SCAN",scan_button_pos_x,scan_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.moveToNewScreen,scanGUI)
             self.createButton(screen,"QUIT",quit_button_pos_x,quit_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.quitScreen)
 
@@ -144,7 +144,7 @@ class mainGUI(GUI):
         print('Exiting mainGUI')
         pygame.quit()
         quit()
-    
+
 
 class scanGUI(GUI):
     def __init__(self):
@@ -176,7 +176,7 @@ class scanGUI(GUI):
         scan_img(image_dir,camera_dir,scanned_dir)
         image = pygame.image.load(scanned_dir + image_dir)
         image = pygame.transform.scale(image, (400, 400))
-        
+
 
         # Displaying name of project
         titleSurf, titleRect = self.createText("Scanned results",(0,0,0))
@@ -202,9 +202,9 @@ class scanGUI(GUI):
             screen.blit(titleSurf, titleRect)
             screen.blit(image, (round(sizeX/2)-round(400/2),100))
 
+            # Define notes_array test array
             # notes_array = [['e3 4 1'], ['d3 4 1'], ['c3 4 1'], ['d3 4 1'], ['e3 4 1'], ['e3 4 1'], ['e3 2 1'], ['d3 4 1'], ['d3 4 1'], ['d3 2 1'], ['e3 4 1'], ['g3 4 1'],
             # ['g3 2 1'], ['e3 4 1'], ['d3 4 1'], ['c3 4 1'], ['d3 4 1'], ['e3 4 1'], ['e3 4 1'], ['e3 2 1'], ['d3 4 1'], ['d3 4 1'], ['e3 4 1'], ['d3 4 1'], ['c3 1 1']]
-
 
             # Draw buttons
             # self.createButton(screen,"YES",scan_button_pos_x,scan_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.moveToNewScreen,[musicGUI,[notes_array]])
@@ -250,7 +250,7 @@ class extractGUI(GUI, Thread):
         pygame.display.set_caption("Extracting notes...")
         scanned_dir = './resources/scanned/'
         image_dir = 'musicsheet7.jpg'
-        
+
         # Displaying name of project
         extractSurf, extractRect = self.createText("Extracting notes...",(0,0,0))
         extractRect.center = (round(sizeX/2),50)
@@ -258,7 +258,7 @@ class extractGUI(GUI, Thread):
         successRect.center = (round(sizeX/2),50)
         failSurf, failRect = self.createText("Extraction failed. Press Cancel.",(0,0,0))
         failRect.center = (round(sizeX/2),50)
-        
+
 
         # The loop will carry on until the user exit the game (e.g. clicks the close button).
         self.state = True
@@ -329,7 +329,7 @@ class musicGUI(GUI, motorCONTROL, Thread):
         self.isPaused = False
         self.decreasing = 1
         self.init_gui()
-    
+
 
     def controlMusic(self):
         if self.isPaused:
@@ -355,8 +355,6 @@ class musicGUI(GUI, motorCONTROL, Thread):
         control_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
         quit_button_pos_x = round(sizeX/2)-round(buttonX/2)+200
         quit_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
-        # test_button_pos_x = round(sizeX/2)-round(buttonX/2)
-        # test_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
         screen = pygame.display.set_mode((sizeX, sizeY))
         progress = 0
         ratio = 2.5
@@ -366,6 +364,7 @@ class musicGUI(GUI, motorCONTROL, Thread):
         FPB = round(FPM/BPM)
         detector = 200
         all_notes = []
+        all_triggers = []
         all_separators = []
 
         pentagram = {
@@ -419,7 +418,7 @@ class musicGUI(GUI, motorCONTROL, Thread):
         for note_bundle in _notes_array:
             for note in note_bundle:
                 notes_array.append(note)
-            
+
         # Start queue thread to control motor
         q = Queue(maxsize=1)
         motor = Thread(target=self.init_thread, args=(q,motorCONTROL,[q,notes_array]), daemon=True)
@@ -433,9 +432,14 @@ class musicGUI(GUI, motorCONTROL, Thread):
             if (counter - 1) % 4 == 0:
                 all_separators.append(counter * pentagram['space_X'] + pentagram['start_X'] - int(pentagram['space_X']/8) + pentagram['start_note'])
             note = note.split(' ')
-            note_position, counter = note_decoder(note, counter, pentagram)
+            note_position, counter, note_trigger = note_decoder(note, counter, pentagram)
+            all_triggers.append(note_trigger)
             all_notes.append(note_position)
             # print(note_position['duration'])
+
+        print(all_notes)
+        print(all_triggers)
+        trigger = all_triggers.pop(0)
 
         # The loop will carry on until the user exit the game (e.g. clicks the close button).
         self.state = True
@@ -463,7 +467,6 @@ class musicGUI(GUI, motorCONTROL, Thread):
             else:
                 self.createButton(screen,"PAUSE",control_button_pos_x,control_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.controlMusic)
             self.createButton(screen,"ABORT",quit_button_pos_x,quit_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.quitScreen)
-            # self.createButton(screen,"TEST",test_button_pos_x,test_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.motorCommand,[q,'hit'])
 
             # Draw pentagram
             for line in range(5):
@@ -491,9 +494,15 @@ class musicGUI(GUI, motorCONTROL, Thread):
             # Logic for motor command communication (need to add individual notes' awareness of location for command sending)
             progress -= self.decreasing
 
-            if abs(progress)%FPB==1 and progress < (detector-FPB-sizeX):
+            trigger_logic = -1*(pentagram['start_note'] + progress) + detector
+            if trigger_logic == trigger:
+                print('trigger_logic == trigger')
                 print(progress)
                 self.motorCommand(q,'hit')
+                if len(all_triggers) != 0:
+                    trigger = all_triggers.pop(0)
+                print('Trigger value: ' +  str(trigger))
+
             if progress < lastnote_trigger:
                 self.state = False
 
@@ -510,16 +519,7 @@ class musicGUI(GUI, motorCONTROL, Thread):
 
 
 if __name__ == "__main__":
-        
+
     pygame.init()
     mainGUI = mainGUI()
     mainGUI.init_gui()
-    
-   
-    
-    
-    
-    
-
-
-    
