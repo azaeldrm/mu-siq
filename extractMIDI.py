@@ -19,11 +19,11 @@ def extractNotes(q, img_file):
     quarter_files = [
         "resources/template/quarter2.png",
         "resources/template/quarter3.png"]
-    sharp_files = [
-        "resources/template/sharp.png"]
-    flat_files = [
-        "resources/template/flat-line.png",
-        "resources/template/flat-space.png" ]
+    # sharp_files = [
+    #     "resources/template/sharp.png"]
+    # flat_files = [
+    #     "resources/template/flat-line.png",
+    #     "resources/template/flat-space.png" ]
     half_files = [
         "resources/template/half-space.png",
         "resources/template/half-note-line.png",
@@ -37,14 +37,14 @@ def extractNotes(q, img_file):
 
     staff_imgs = [cv2.imread(staff_file, 0) for staff_file in staff_files]
     quarter_imgs = [cv2.imread(quarter_file, 0) for quarter_file in quarter_files]
-    sharp_imgs = [cv2.imread(sharp_files, 0) for sharp_files in sharp_files]
-    flat_imgs = [cv2.imread(flat_file, 0) for flat_file in flat_files]
+    # sharp_imgs = [cv2.imread(sharp_files, 0) for sharp_files in sharp_files]
+    # flat_imgs = [cv2.imread(flat_file, 0) for flat_file in flat_files]
     half_imgs = [cv2.imread(half_file, 0) for half_file in half_files]
     whole_imgs = [cv2.imread(whole_file, 0) for whole_file in whole_files]
 
     staff_lower, staff_upper, staff_thresh = 50, 150, 0.8
-    sharp_lower, sharp_upper, sharp_thresh = 50, 150, 0.70
-    flat_lower, flat_upper, flat_thresh = 50, 150, 0.77
+    # sharp_lower, sharp_upper, sharp_thresh = 50, 150, 0.70
+    # flat_lower, flat_upper, flat_thresh = 50, 150, 0.77
     quarter_lower, quarter_upper, quarter_thresh = 50, 150, 0.75
     half_lower, half_upper, half_thresh = 50, 150, 0.70
     whole_lower, whole_upper, whole_thresh = 50, 150, 0.70
@@ -91,16 +91,19 @@ def extractNotes(q, img_file):
         scale_ratio = round(x_goal / img_width, 2)
         print('Original image width and height:')
         print((img_width,img_height))
-        print('Scale ratio:')
-        print(scale_ratio)
-        resize_dim = (int(img_width * scale_ratio), int(img_height * scale_ratio))
-        img = cv2.resize(img,resize_dim,interpolation = cv2.INTER_AREA)
+        if scale_ratio < 0.85:
+            print('Scale ratio:')
+            print(scale_ratio)
+            print('Image has been resized.')
+            resize_dim = (int(img_width * scale_ratio), int(img_height * scale_ratio))
+            img = cv2.resize(img,resize_dim,interpolation = cv2.INTER_AREA)
         img_gray = img#cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         img = cv2.cvtColor(img_gray,cv2.COLOR_GRAY2RGB)
         ret,img_gray = cv2.threshold(img_gray,127,255,cv2.THRESH_BINARY)
         img_width, img_height = img_gray.shape[::-1]
-        print('New image with and height:')
-        print((img_width,img_height))
+        if scale_ratio < 0.85:
+            print('New image with and height:')
+            print((img_width,img_height))
 
         print("\nMatching staff image...")
         staff_recs = locate_images(img_gray, staff_imgs, staff_lower, staff_upper, staff_thresh)

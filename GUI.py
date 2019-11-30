@@ -203,8 +203,8 @@ class scanGUI(GUI):
             screen.blit(image, (round(sizeX/2)-round(400/2),100))
 
             # Define notes_array test array
-            # notes_array = [['e3 4 1'], ['d3 4 1'], ['c3 4 1'], ['d3 4 1'], ['e3 4 1'], ['e3 4 1'], ['e3 2 1'], ['d3 4 1'], ['d3 4 1'], ['d3 2 1'], ['e3 4 1'], ['g3 4 1'],
-            # ['g3 2 1'], ['e3 4 1'], ['d3 4 1'], ['c3 4 1'], ['d3 4 1'], ['e3 4 1'], ['e3 4 1'], ['e3 2 1'], ['d3 4 1'], ['d3 4 1'], ['e3 4 1'], ['d3 4 1'], ['c3 1 1']]
+            # notes_array = [['e3 4 1'], ['d3 4 1'], ['c3 4 1'], ['d3 4 1'], ['e3 4 1'], ['e3 4 1'], ['e3 2 1'], ['d3 4 1'], ['d3 4 1'], ['d3 2 1'], ['e3 4 1'], ['e3 4 1'],
+            # ['e3 2 1'], ['e3 4 1'], ['d3 4 1'], ['c3 4 1'], ['d3 4 1'], ['e3 4 1'], ['e3 4 1'], ['e3 2 1'], ['d3 4 1'], ['d3 4 1'], ['e3 4 1'], ['d3 4 1'], ['c3 1 1']]
 
             # Draw buttons
             # self.createButton(screen,"YES",scan_button_pos_x,scan_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.moveToNewScreen,[musicGUI,[notes_array]])
@@ -249,7 +249,7 @@ class extractGUI(GUI, Thread):
         screen = pygame.display.set_mode((sizeX, sizeY))
         pygame.display.set_caption("Extracting notes...")
         scanned_dir = './resources/scanned/'
-        image_dir = 'musicsheet7.jpg'
+        image_dir = 'mary.png'
 
         # Displaying name of project
         extractSurf, extractRect = self.createText("Extracting notes...",(0,0,0))
@@ -294,7 +294,7 @@ class extractGUI(GUI, Thread):
                 print('Queue received information.')
                 notes_array = q.get()
                 q.task_done()
-                if notes_array == None:
+                if notes_array == None or len(notes_array) == 0:
                     self.extracted = False
                 else:
                     self.extracted = True
@@ -362,7 +362,7 @@ class musicGUI(GUI, motorCONTROL, Thread):
         FPS = 120
         FPM = FPS * 60
         FPB = round(FPM/BPM)
-        detector = 200
+        detector = 300
         all_notes = []
         all_triggers = []
         all_separators = []
@@ -371,7 +371,7 @@ class musicGUI(GUI, motorCONTROL, Thread):
             'start_X': 0,
             'start_Y': 100,
             'space_X': FPB,
-            'space_Y': 20,
+            'space_Y': 8*ratio,
             'start_note': 800
         }
 
@@ -449,7 +449,7 @@ class musicGUI(GUI, motorCONTROL, Thread):
 
         # print(all_notes)
         lastnote_trigger = -1*(all_notes[-1]['X'] + sizeX + 100)
-        # print(lastnote_trigger)
+        print(lastnote_trigger)
 
         # -------- Main Program Loop -----------
         while self.state:
@@ -504,6 +504,7 @@ class musicGUI(GUI, motorCONTROL, Thread):
                 print('Trigger value: ' +  str(trigger))
 
             if progress < lastnote_trigger:
+                print(progress)
                 self.state = False
 
             pygame.display.flip()
