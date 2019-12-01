@@ -99,7 +99,7 @@ class mainGUI(GUI):
         scan_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
         quit_button_pos_x = round(sizeX/2)-round(buttonX/2)+200
         quit_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
-        screen = pygame.display.set_mode((sizeX, sizeY))
+        screen = pygame.display.set_mode((sizeX, sizeY), pygame.FULLSCREEN)
         pygame.display.set_caption("Pentagram GUI")
 
         # Displaying name of project
@@ -166,7 +166,7 @@ class scanGUI(GUI):
         scan_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
         quit_button_pos_x = round(sizeX/2)-round(buttonX/2)+200
         quit_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
-        screen = pygame.display.set_mode((sizeX, sizeY))
+        screen = pygame.display.set_mode((sizeX, sizeY), pygame.FULLSCREEN)
         pygame.display.set_caption("Scan GUI")
         camera_dir = './resources/camera/'
         scanned_dir = './resources/scanned/'
@@ -248,7 +248,7 @@ class extractGUI(GUI, Thread):
         cancel_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
         continue_button_pos_x = round(sizeX/2)-round(buttonX/2)-200
         continue_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
-        screen = pygame.display.set_mode((sizeX, sizeY))
+        screen = pygame.display.set_mode((sizeX, sizeY), pygame.FULLSCREEN)
         pygame.display.set_caption("Extracting notes...")
         scanned_dir = './resources/scanned/'
         image_dir = 'musicsheet4.jpg'
@@ -376,7 +376,7 @@ class musicGUI(GUI, motorCONTROL, Thread):
         control_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
         quit_button_pos_x = round(sizeX/2)-round(buttonX/2)+200
         quit_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
-        screen = pygame.display.set_mode((sizeX, sizeY))
+        screen = pygame.display.set_mode((sizeX, sizeY), pygame.FULLSCREEN)
         progress = 0
         ratio = 2.5
         BPM = 60 # Adjust this for the speed of the song.
@@ -514,15 +514,15 @@ class musicGUI(GUI, motorCONTROL, Thread):
 
             # Logic for motor command communication (need to add individual notes' awareness of location for command sending)
             progress -= self.decreasing
-
             trigger_logic = -1*(pentagram['start_note'] + progress) + detector
-            if trigger_logic == trigger:
+            if trigger_logic == trigger[0]:
                 print('trigger_logic == trigger')
                 print(progress)
-                self.motorCommand(q,'hit')
+                self.motorCommand(q,trigger[1])
+                print(trigger[1])
                 if len(all_triggers) != 0:
                     trigger = all_triggers.pop(0)
-                print('Trigger value: ' +  str(trigger))
+                print('Trigger value: ' +  str(trigger[0]))
 
             if progress < lastnote_trigger:
                 print(progress)
