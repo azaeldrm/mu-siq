@@ -238,10 +238,12 @@ class extractGUI(GUI, Thread):
         WHITE = (240,240,240)
         RED_B = (200,20,20)
         RED_D = (160,0,0)
+        GREEN = (20,200,20)
         sizeX = 800
         sizeY = 500
         buttonX = 160
         buttonY = 80
+        loading_bar = 0
         cancel_button_pos_x = round(sizeX/2)-round(buttonX/2)+200
         cancel_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
         continue_button_pos_x = round(sizeX/2)-round(buttonX/2)-200
@@ -249,7 +251,7 @@ class extractGUI(GUI, Thread):
         screen = pygame.display.set_mode((sizeX, sizeY))
         pygame.display.set_caption("Extracting notes...")
         scanned_dir = './resources/scanned/'
-        image_dir = 'mary.png'
+        image_dir = 'musicsheet4.jpg'
 
         # Displaying name of project
         extractSurf, extractRect = self.createText("Extracting notes...",(0,0,0))
@@ -258,6 +260,7 @@ class extractGUI(GUI, Thread):
         successRect.center = (round(sizeX/2),50)
         failSurf, failRect = self.createText("Extraction failed. Press Cancel.",(0,0,0))
         failRect.center = (round(sizeX/2),50)
+        
 
 
         # The loop will carry on until the user exit the game (e.g. clicks the close button).
@@ -292,20 +295,38 @@ class extractGUI(GUI, Thread):
             # Getting information from thread
             if not q.empty():
                 print('Queue received information.')
-                notes_array = q.get()
+                msg = q.get()
                 q.task_done()
-                if notes_array == None or len(notes_array) == 0:
-                    self.extracted = False
-                else:
-                    self.extracted = True
-                print(notes_array)
+                if isinstance(msg,int):
+                    loading_bar = msg
+                    print(loading_bar)
+                elif isinstance(msg,list):
+                    notes_array = msg
+                    if notes_array == None or len(notes_array) == 0:
+                        self.extracted = False
+                    else:
+                        self.extracted = True
+                    print(notes_array)
 
-            # Draw buttons
-            if self.extracted == False:
+            # Draw loading bar container
+            pygame.draw.rect(screen, BLACK, (round(sizeX/2) - 100, round(sizeY/2) - 40 - 50, 200, 80), 4)
+
+            # Draw buttons and loading bar
+            if self.extracted == None:
+                pygame.draw.rect(screen, GREEN, (round(sizeX/2) - 90, round(sizeY/2) - 30 - 50, 180*(loading_bar/100), 60))
+                loadSurf, loadRect = self.createText(str(loading_bar) + ' %',(0,0,0))
+            elif self.extracted == False:
                 self.createButton(screen,"CANCEL",cancel_button_pos_x,cancel_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.moveToNewScreen,mainGUI)
-            if self.extracted == True:
+                pygame.draw.rect(screen, RED_B, (round(sizeX/2) - 90, round(sizeY/2) - 30 - 50, 180*(loading_bar/100), 60))
+                loadSurf, loadRect = self.createText('FAILED',(0,0,0))
+            elif self.extracted == True:
                 self.createButton(screen,"CANCEL",cancel_button_pos_x,cancel_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.moveToNewScreen,mainGUI)
                 self.createButton(screen,"CONTINUE",continue_button_pos_x,continue_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.moveToNewScreen,[musicGUI,[notes_array]])
+                pygame.draw.rect(screen, GREEN, (round(sizeX/2) - 90, round(sizeY/2) - 30 - 50, 180*(loading_bar/100), 60))
+                loadSurf, loadRect = self.createText(str(loading_bar) + ' %',(0,0,0))
+
+            loadRect.center = (round(sizeX/2),round(sizeY/2) - 50)
+            screen.blit(loadSurf, loadRect)
 
             # Refresh the game
             pygame.display.flip()

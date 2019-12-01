@@ -129,6 +129,8 @@ def extractNotes(q, img_file):
         for r in staff_boxes:
             r.draw(staff_boxes_img, (0, 0, 255), 2)
         cv2.imwrite('staff_boxes_img.png', staff_boxes_img)
+        q.put(25)
+        q.join()
         # open_file('staff_boxes_img.png')
 
         # print("Matching sharp image...")
@@ -163,6 +165,8 @@ def extractNotes(q, img_file):
             r.draw(quarter_recs_img, (0, 0, 255), 2)
         cv2.imwrite('quarter_recs_img.png', quarter_recs_img)
         # open_file('quarter_recs_img.png')
+        q.put(50)
+        q.join()
 
         print("Matching half image...")
         half_recs = locate_images(img_gray, half_imgs, half_lower, half_upper, half_thresh)
@@ -174,6 +178,8 @@ def extractNotes(q, img_file):
             r.draw(half_recs_img, (0, 0, 255), 2)
         cv2.imwrite('half_recs_img.png', half_recs_img)
         # open_file('half_recs_img.png')
+        q.put(75)
+        q.join()
 
         print("Matching whole image...")
         whole_recs = locate_images(img_gray, whole_imgs, whole_lower, whole_upper, whole_thresh)
@@ -185,6 +191,10 @@ def extractNotes(q, img_file):
             r.draw(whole_recs_img, (0, 0, 255), 2)
         cv2.imwrite('whole_recs_img.png', whole_recs_img)
         # open_file('whole_recs_img.png')
+        q.put(100)
+        q.join()
+
+
 
         note_groups = []
         for box in staff_boxes:
