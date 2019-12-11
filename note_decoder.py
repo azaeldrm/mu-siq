@@ -57,7 +57,6 @@ def note_decoder(note, counter, pentagram):
         'L0': ypos + 4*yspace + round(yspace/2) ,
     }
 
-    # print(note)
     position['X'] = counter*xspace
     note_trigger = (position['X'], note[0][0])
     position['Y'] = pentagram_to_pos[note_to_pentagram[note[0][0:2]]] + location_error + note_error[note[1]]

@@ -6,13 +6,7 @@ from scanIMG import scan_img
 from threading import Thread
 from CONTROL import motorCONTROL
 from extractMIDI import extractNotes
-from multiprocessing import Process
 
-
-
-# For a note to spawn at the 4th space (mi), it needs to start at y=pentaStart
-# to move down a third * n, it needs to start at y=pentaStart + pentaSpace * n
-# to move than a second * n, it needs to start at y=pentaStart + pentaSpace/2 * n
 
 class GUI:
     def __init__(self):
@@ -99,11 +93,11 @@ class mainGUI(GUI):
         scan_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
         quit_button_pos_x = round(sizeX/2)-round(buttonX/2)+200
         quit_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
-        screen = pygame.display.set_mode((sizeX, sizeY), pygame.FULLSCREEN)
+        screen = pygame.display.set_mode((sizeX, sizeY))
         pygame.display.set_caption("Pentagram GUI")
 
         # Displaying name of project
-        titleSurf, titleRect = self.createText("μ-SIQ, the Autonomous Instrument",(0,0,0))
+        titleSurf, titleRect = self.createText("μ-SIC, the Autonomous Musical Instrument",(0,0,0))
         titleRect.center = (round(sizeX/2),100)
 
         # The loop will carry on until the user exit the game (e.g. clicks the close button).
@@ -128,9 +122,6 @@ class mainGUI(GUI):
                 pygame.draw.line(screen, BLACK, [round(sizeX/2)-160,130+(_+1)*10], [round(sizeX/2)+160,130+(_+1)*10], 1)
 
             # Draw buttons
-            # self.createButton(screen,"SCAN",scan_button_pos_x,scan_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.moveToMusicScreen,musicGUI)
-            # self.createButton(screen,"SCAN",scan_button_pos_x,scan_button_pos_y,buttonX,buttonY,RED_B,RED_D,scan_img,['musicsheet2.jpg','./resources/camera/','./resources/scanned/'])
-
             self.createButton(screen,"SCAN",scan_button_pos_x,scan_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.moveToNewScreen,scanGUI)
             self.createButton(screen,"QUIT",quit_button_pos_x,quit_button_pos_y,buttonX,buttonY,RED_B,RED_D,self.quitScreen)
 
@@ -166,11 +157,11 @@ class scanGUI(GUI):
         scan_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
         quit_button_pos_x = round(sizeX/2)-round(buttonX/2)+200
         quit_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
-        screen = pygame.display.set_mode((sizeX, sizeY), pygame.FULLSCREEN)
+        screen = pygame.display.set_mode((sizeX, sizeY))
         pygame.display.set_caption("Scan GUI")
         camera_dir = './resources/camera/'
         scanned_dir = './resources/scanned/'
-        image_dir = 'musicsheet7.jpg'
+        image_dir = 'musicsheet4.jpg'
 
         # Taking picture and scanning it
         scan_img(image_dir,camera_dir,scanned_dir)
@@ -248,10 +239,10 @@ class extractGUI(GUI, Thread):
         cancel_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
         continue_button_pos_x = round(sizeX/2)-round(buttonX/2)-200
         continue_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
-        screen = pygame.display.set_mode((sizeX, sizeY), pygame.FULLSCREEN)
+        screen = pygame.display.set_mode((sizeX, sizeY))
         pygame.display.set_caption("Extracting notes...")
         scanned_dir = './resources/scanned/'
-        image_dir = 'musicsheet4.jpg'
+        image_dir = 'mary.png'
 
         # Displaying name of project
         extractSurf, extractRect = self.createText("Extracting notes...",(0,0,0))
@@ -376,7 +367,7 @@ class musicGUI(GUI, motorCONTROL, Thread):
         control_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
         quit_button_pos_x = round(sizeX/2)-round(buttonX/2)+200
         quit_button_pos_y = round(sizeY/2)-round(buttonY/2)+120
-        screen = pygame.display.set_mode((sizeX, sizeY), pygame.FULLSCREEN)
+        screen = pygame.display.set_mode((sizeX, sizeY))
         progress = 0
         ratio = 2.5
         BPM = 60 # Adjust this for the speed of the song.
@@ -427,8 +418,6 @@ class musicGUI(GUI, motorCONTROL, Thread):
         textRect = text['a'].get_rect()
         textRect.center = (20, 100)
 
-        size = (sizeX, sizeY)
-        screen = pygame.display.set_mode(size)
         pygame.display.set_caption("Pentagram GUI")
 
         counter = 1
@@ -440,27 +429,20 @@ class musicGUI(GUI, motorCONTROL, Thread):
             for note in note_bundle:
                 notes_array.append(note)
 
-        # Start queue thread to control motor
-        q = Queue(maxsize=1)
-        motor = Thread(target=self.init_thread, args=(q,motorCONTROL,[q,notes_array]), daemon=True)
-        motor.start()
-        # I can pass the array through here, so it is stored onto motorCONTROL, and I can control
-        # the TEMPO of the notes via it!!!!!!!!
-
-        # print(notes_array)
         for note in notes_array:
-            # print(counter)
             if (counter - 1) % 4 == 0:
                 all_separators.append(counter * pentagram['space_X'] + pentagram['start_X'] - int(pentagram['space_X']/8) + pentagram['start_note'])
             note = note.split(' ')
             note_position, counter, note_trigger = note_decoder(note, counter, pentagram)
             all_triggers.append(note_trigger)
             all_notes.append(note_position)
-            # print(note_position['duration'])
 
-        print(all_notes)
-        print(all_triggers)
         trigger = all_triggers.pop(0)
+
+        # Start queue thread to control motor
+        q = Queue(maxsize=1)
+        motor = Thread(target=self.init_thread, args=(q,motorCONTROL,[q,all_triggers]), daemon=True)
+        motor.start()
 
         # The loop will carry on until the user exit the game (e.g. clicks the close button).
         self.state = True
@@ -468,7 +450,6 @@ class musicGUI(GUI, motorCONTROL, Thread):
         # The clock will be used to control how fast the screen updates
         clock = pygame.time.Clock()
 
-        # print(all_notes)
         lastnote_trigger = -1*(all_notes[-1]['X'] + sizeX + 100)
         print(lastnote_trigger)
 
@@ -501,10 +482,6 @@ class musicGUI(GUI, motorCONTROL, Thread):
                 screen.blit(
                     text[note['pitch']], (note['X'] + pentagram['start_note'] + progress + 10, pentagram['start_Y'] + 8 * pentagram['space_Y']))
 
-            # for separator in all_separators:
-            #     pygame.draw.line(screen, BLACK,
-            #         [separator + progress, pentagram['start_Y'] + pentagram['space_Y']],
-            #         [separator + progress, pentagram['start_Y'] + pentagram['space_Y'] * 5])
 
             # Draw note detector
             pygame.draw.line(screen, BLACK,
@@ -537,11 +514,3 @@ class musicGUI(GUI, motorCONTROL, Thread):
         print('Exiting mainGUI')
         self.motorCommand(q,'changeState')
         self.moveToNewScreen(mainGUI)
-
-
-
-if __name__ == "__main__":
-
-    pygame.init()
-    mainGUI = mainGUI()
-    mainGUI.init_gui()
